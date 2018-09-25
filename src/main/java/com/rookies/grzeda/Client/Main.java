@@ -15,7 +15,7 @@ public class Main {
 	public static void main(String[] args) {
 		Socket clientSocket = null;
 		try {
-			clientSocket = new Socket("localhost", 8008);
+			clientSocket = new Socket("mbulatek.nazwa.pl", 8008);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -28,7 +28,7 @@ public class Main {
 			
 			public void event(Message message) {
 				ChatMessage msg = (ChatMessage) message;
-				System.out.println(msg.text);
+				System.out.println("Other: " + msg.text);
 			}
 		};
 		
@@ -41,9 +41,14 @@ public class Main {
 			e.printStackTrace();
 		}
 		
+
+		Scanner input = new Scanner(System.in);
+		System.out.println("Enter table No: ");
+		int tableNo = input.nextInt();
+		input.nextLine();
 		
 		Message msgInit = new Message();
-		msgInit.tableNo = 0;
+		msgInit.tableNo = tableNo;
 		msgInit.type = Message.Type.initial;
 		
 		try {
@@ -53,16 +58,12 @@ public class Main {
 		}            
 
 
-		Scanner input = new Scanner(System.in);
-
 		while (true) {
 			ChatMessage msg = new ChatMessage();
 			
-			System.out.println("Table No: ");
-			msg.tableNo = input.nextInt();
-			input.nextLine();
+			msg.tableNo = tableNo;
 			
-			System.out.println("Message: ");
+			System.out.println("You: ");
 			msg.text = input.nextLine();
 			
 			msg.type = Message.Type.chat;

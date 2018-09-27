@@ -1,18 +1,27 @@
 package com.rookies.grzeda.Client;
 
+import java.awt.TrayIcon.MessageType;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import com.rookies.grzeda.Connection.Client;
+
 import Messaging.Message;
 
-interface DataReadyEventListener {
-	public void event(Message message);
+interface ReceiverEventListener {
+	class Event {
+		Receiver source;
+		Message message;
+	}
+
+	public void eventChat(Event event);
+	public void eventInitiailized(Event event);
 }
 
 public class Receiver implements Runnable {
-	public DataReadyEventListener eventListener;
+	public ReceiverEventListener eventListener;
 	public Socket socket;
 	
 	ObjectInputStream inFromClient;
@@ -24,7 +33,7 @@ public class Receiver implements Runnable {
 			e.printStackTrace();
 		}
 		
-		while (socket.isConnected()) {
+		while (socket.isClosed() == false) {
             Message inMsg = null;
 			try {
 				inMsg = (Message)inFromClient.readObject();
@@ -36,7 +45,18 @@ public class Receiver implements Runnable {
 			
 			if (inMsg != null) {
 				if (eventListener != null) {
-					eventListener.event(inMsg);
+					if (inMsg.type == Message.Type.initial) {
+						ReceiverEventListener.Event event = new ReceiverEventListener.Event();
+						event.source = this;
+						event.message = inMsg;
+						eventListener.eventInitiailized(event);
+					}
+					if (inMsg.type == Message.Type.chat) {
+						ReceiverEventListener.Event event = new ReceiverEventListener.Event();
+						event.source = this;
+						event.message = inMsg;
+						eventListener.eventChat(event);
+					}
 				}
 			}
 		}
